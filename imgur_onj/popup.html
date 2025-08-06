@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Imgurアップローダー</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Imgurアップローダー</h1>
+    </div>
+
+    <div class="section">
+      <label>アップロード</label>
+      
+      <label for="image-input" class="btn btn-primary">ファイルを選択</label>
+      <input type="file" id="image-input" accept="image/*" style="display:none;">
+
+      <div class="or-divider">または</div>
+      
+      <button id="paste-upload-button" class="btn btn-secondary">クリップボードから貼り付け</button>
+
+      <div class="or-divider">または</div>
+
+      <button id="capture-button" class="btn btn-secondary">スクリーンショットを撮る</button>
+
+      <div class="or-divider">または</div>
+
+      <div class="input-group">
+        <input type="text" id="url-input" placeholder="画像URLを貼り付け">
+        <button id="url-upload-button" class="btn btn-secondary">URLからアップロード</button>
+      </div>
+
+      <div id="status" class="status-text"></div>
+    </div>
+
+    <div class="section">
+      <div class="history-header">
+        <h2>アップロード履歴</h2>
+        <select id="folder-select" class="folder-select"></select>
+        <button id="clear-history-button" class="btn btn-danger btn-small">履歴を消去</button>
+      </div>
+      <div id="history-placeholder" class="placeholder-text">まだ画像がアップロードされていません。</div>
+      <ul id="history-list"></ul>
+    </div>
+
+    <div class="section">
+      <button id="open-options-button" class="btn btn-secondary">設定・フォルダ管理</button>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

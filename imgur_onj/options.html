@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Imgur Uploader Options</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="popup.css"> <!-- popup.cssを再利用 -->
+  <style>
+    body {
+      width: 600px; /* オプションページの幅を広げる */
+      padding: 20px;
+    }
+    .folder-management {
+      margin-top: 20px;
+    }
+    .folder-item {
+      margin-bottom: 5px;
+    }
+    .folder-item span {
+      flex-grow: 1;
+    }
+    .folder-item .btn {
+      margin-left: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Imgur Uploader 設定</h1>
+
+    <div class="section">
+      <h2>クライアントID設定</h2>
+      <p class="help-text">
+        Imgurに画像をアップロードするには、クライアントIDの登録が必要です。<a href="https://api.imgur.com/oauth2/addclient" target="_blank">こちら</a>から取得し、以下に貼り付けて保存してください。
+      </p>
+      <label for="client-id">クライアントID</label>
+      <div class="input-group">
+        <input type="text" id="client-id" placeholder="ImgurのクライアントID">
+        <button id="save-button" class="btn btn-secondary">保存</button>
+      </div>
+      <div id="save-status" class="status-text"></div>
+    </div>
+
+    <div class="section folder-management">
+      <h2>フォルダ管理</h2>
+      <div class="input-group" style="margin-bottom: 15px;">
+        <input type="text" id="new-folder-name" placeholder="新しいフォルダ名">
+        <button id="create-folder-button" class="btn btn-secondary">フォルダ作成</button>
+      </div>
+      <div id="folder-list"></div>
+    </div>
+  </div>
+  <script src="options.js"></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Imgur Uploader",
+  "version": "1.0",
+  "description": "Select an image file to upload to Imgur.",
+  "permissions": ["storage", "activeTab", "scripting", "clipboardRead"],
+  "host_permissions": [
+    "https://api.imgur.com/"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "options_page": "options.html",
+  "web_accessible_resources": [
+    {
+      "resources": ["history.html"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

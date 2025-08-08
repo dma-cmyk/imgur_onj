@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>アップロード履歴</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" type="text/css" href="history.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>アップロード履歴</h1>
+    </div>
+
+    <div class="section">
+      <div class="history-header">
+        <select id="folder-select" class="folder-select"></select>
+        <div class="slider-container">
+          <i class="material-icons">photo_size_select_small</i>
+          <input type="range" min="100" max="400" value="250" class="slider" id="size-slider">
+          <i class="material-icons">photo_size_select_large</i>
+        </div>
+        <button id="clear-history-button" class="btn btn-danger btn-small">
+          <i class="material-icons">delete_forever</i>
+        </button>
+      </div>
+      <div id="history-placeholder" class="placeholder-text">まだ画像がアップロードされていません。</div>
+      <ul id="history-list"></ul>
+    </div>
+  </div>
+
+  <div id="myModal" class="modal">
+    
+    <img class="modal-content" id="modalImage">
+  </div>
+
+  <div id="folderSelectionModal" class="modal">
+    <div class="modal-content">
+      <span class="close-folder-modal material-icons">close</span>
+      <h2>フォルダを選択</h2>
+      <ul id="folder-list" class="folder-list"></ul>
+    </div>
+  </div>
+
+  <div id="messageModal" class="modal">
+    <div class="modal-content">
+      <h2 id="messageModalTitle"></h2>
+      <p id="messageModalBody"></p>
+      <div class="message-modal-actions">
+        <button id="messageModalConfirm" class="btn btn-danger">はい</button>
+        <button id="messageModalCancel" class="btn btn-secondary">いいえ</button>
+        <button id="messageModalClose" class="btn btn-secondary">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="history.js"></script>
+  <div id="toast"></div>
+</body>
+</html>

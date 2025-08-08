@@ -1,0 +1,414 @@
+/* Simple and Clean Theme for History Page */
+body {
+    font-family: 'Noto Sans JP', sans-serif; /* Keep Noto Sans JP for readability */
+    background-color: #f0f2f5; /* Light background */
+    color: #333333; /* Dark text */
+    margin: 0;
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    width: 100%;
+    max-width: 1280px; /* Slightly smaller max width for simplicity */
+    margin: 10px auto; /* Center container with some top/bottom margin */
+    padding: 20px;
+    box-sizing: border-box;
+    flex-grow: 1;
+    background-color: #ffffff; /* White background for content area */
+    border-radius: 8px; /* Subtle rounded corners */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1); /* Very subtle shadow */
+    min-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    background-color: #ffffff; /* Match container background */
+    padding: 15px 0;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eeeeee; /* Simple separator */
+}
+
+h1 {
+    font-size: 24px;
+    font-weight: 500;
+    color: #333333;
+    margin: 0;
+}
+
+.section {
+    background-color: #ffffff; /* Match container background */
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.history-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.slider-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-grow: 1;
+    justify-content: center;
+}
+
+.slider {
+    -webkit-appearance: none;
+    width: 150px;
+    height: 5px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+    border-radius: 5px;
+}
+
+.slider:hover {
+    opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 15px;
+    height: 15px;
+    background: #4a90e2;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+.slider::-moz-range-thumb {
+    width: 15px;
+    height: 15px;
+    background: #4a90e2;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+.folder-select, .btn {
+    border: 1px solid #cccccc; /* Simple border */
+    background-color: #ffffff; /* White background */
+    color: #333333;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+    box-shadow: none;
+}
+
+.folder-select:hover, .btn:hover {
+    background-color: #f0f0f0;
+    border-color: #bbbbbb;
+}
+
+.btn-danger {
+    background-color: #dc3545; /* Bootstrap-like danger color */
+    color: #ffffff;
+    border-color: #dc3545;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+    border-color: #bd2130;
+}
+
+.btn-secondary {
+    background-color: #6c757d; /* Bootstrap-like secondary color */
+    color: #ffffff;
+    border-color: #6c757d;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+}
+
+.btn-small {
+    padding: 4px; /* Smaller padding for icon-only buttons */
+    font-size: 16px; /* Icon size */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 28px; /* Fixed width for square buttons */
+    height: 28px; /* Fixed height for square buttons */
+    border-radius: 4px; /* Square buttons */
+}
+
+.history-item-actions {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 6px; /* Reduced padding */
+    background: rgba(255,255,255,0.9); /* Light background for actions */
+    display: flex;
+    justify-content: space-between; /* Distribute space between items */
+    box-sizing: border-box;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    gap: 3px; /* Smaller gap */
+    border-top: 1px solid #eeeeee; /* Simple separator */
+}
+
+.history-item:hover .history-item-actions {
+    opacity: 1;
+}
+
+#history-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--thumbnail-size, 250px), 1fr));
+    gap: 8px;
+    list-style: none;
+    padding: 0;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+.history-item.dragging {
+  opacity: 0.5;
+  background: #f0f0f0;
+}
+
+.history-item {
+    position: relative;
+    border-radius: 4px; /* Simpler rounded corners */
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    background-color: #f8f8f8; /* Light card background */
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05); /* Very subtle shadow */
+    border: 1px solid #eeeeee; /* Light border */
+    aspect-ratio: 1 / 1;
+}
+
+.history-item:hover {
+    transform: translateY(-2px); /* Subtle lift */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Slightly more visible shadow on hover */
+}
+
+.history-item .thumbnail {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: opacity 0.3s ease;
+}
+
+.history-item:hover .thumbnail {
+    opacity: 0.9;
+}
+
+/* Modal styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.7); /* Darker overlay */
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-content {
+    display: block;
+    max-width: 95vw; /* Slightly smaller modal image */
+    max-height: 95vh;
+    width: auto;
+    height: auto;
+    margin: auto;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.98);
+    animation: zoomIn 0.3s ease forwards;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Simple shadow */
+}
+
+@keyframes zoomIn {
+    from { transform: translate(-50%, -50%) scale(0.95); opacity: 0; }
+    to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+.close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    color: #ffffff; /* White close button */
+    font-size: 36px;
+    font-weight: bold;
+    transition: 0.3s;
+    cursor: pointer;
+    background-color: rgba(0,0,0,0.5); /* Semi-transparent background */
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.close:hover, .close:focus {
+    color: #eeeeee;
+    background-color: rgba(0,0,0,0.7);
+}
+
+.prev, .next {
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  width: auto;
+  padding: 12px;
+  margin-top: -24px;
+  color: white;
+  font-weight: bold;
+  font-size: 24px;
+  transition: 0.3s ease;
+  border-radius: 4px;
+  user-select: none;
+  background-color: rgba(0,0,0,0.4);
+}
+
+.next {
+  right: 0;
+  border-radius: 4px 0 0 4px;
+}
+
+.prev {
+    left: 0;
+    border-radius: 0 4px 4px 0;
+}
+
+.prev:hover, .next:hover {
+  background-color: rgba(0,0,0,0.6);
+}
+
+.placeholder-text {
+    text-align: center;
+    color: #999999; /* Lighter grey for placeholder */
+    padding: 50px;
+    font-size: 1.1em;
+}
+
+/* Folder Selection Modal Specific Styles */
+#folderSelectionModal .modal-content {
+    max-width: 350px; /* Smaller modal for folder selection */
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #ffffff; /* White background */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+#folderSelectionModal h2 {
+    color: #333333;
+    font-size: 20px;
+    margin-bottom: 20px;
+}
+
+.folder-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.folder-list li {
+    background-color: #f0f0f0;
+    color: #333333;
+    padding: 10px 15px;
+    margin-bottom: 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    border: 1px solid #e0e0e0;
+}
+
+.folder-list li:hover {
+    background-color: #e0e0e0;
+}
+
+.folder-list li.current-folder {
+    background-color: #e6f7ff; /* Light blue for current folder */
+    border-color: #91d5ff;
+    font-weight: bold;
+}
+
+.close-folder-modal {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: #666666;
+    font-size: 24px;
+    font-weight: bold;
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+.close-folder-modal:hover, .close-folder-modal:focus {
+    color: #333333;
+}
+
+#toast {
+    visibility: hidden;
+    min-width: 250px;
+    margin-left: -125px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 2px;
+    padding: 16px;
+    position: fixed;
+    z-index: 1001;
+    left: 50%;
+    bottom: 30px;
+    font-size: 17px;
+}
+
+#toast.show {
+    visibility: visible;
+    -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+    animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+
+@-webkit-keyframes fadein {
+    from {bottom: 0; opacity: 0;}
+    to {bottom: 30px; opacity: 1;}
+}
+
+@keyframes fadein {
+    from {bottom: 0; opacity: 0;}
+    to {bottom: 30px; opacity: 1;}
+}
+
+@-webkit-keyframes fadeout {
+    from {bottom: 30px; opacity: 1;}
+    to {bottom: 0; opacity: 0;}
+}
+
+@keyframes fadeout {
+    from {bottom: 30px; opacity: 1;}
+    to {bottom: 0; opacity: 0;}
+}

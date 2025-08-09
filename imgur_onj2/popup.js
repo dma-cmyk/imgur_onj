@@ -16,7 +16,31 @@ document.addEventListener('DOMContentLoaded', function () {
   const fileContent = document.getElementById('file-content');
   const clipboardContent = document.getElementById('clipboard-content');
   const screenshotContent = document.getElementById('screenshot-content');
+  const videoContent = document.getElementById('video-content'); // New
   const urlContent = document.getElementById('url-content');
+  const startDesktopCaptureButton = document.getElementById('start-desktop-capture-button'); // New
+  const stopCaptureButton = document.getElementById('stop-capture-button'); // New
+  const videoStatus = document.getElementById('video-status'); // New
+
+  const openSidebarButton = document.getElementById('open-sidebar-button');
+
+  if (openSidebarButton) {
+    openSidebarButton.addEventListener('click', async () => {
+      if (chrome.runtime && chrome.runtime.sendMessage) {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (tab && tab.id) {
+          chrome.runtime.sendMessage({ action: 'openSidePanel', tabId: tab.id });
+        } else {
+          console.error('Could not get current tab ID.');
+          statusDiv.textContent = 'サイドバーを開くためのタブ情報が取得できませんでした。';
+        }
+        window.close(); // Close the popup after opening the sidebar
+      } else {
+        console.warn('Message sending API not available.');
+        statusDiv.textContent = 'サイドバー機能は利用できません。';
+      }
+    });
+  }
 
   // Handle upload method change
   uploadMethodSelect.addEventListener('change', () => {
@@ -25,6 +49,7 @@ document.addEventListener('DOMContentLoaded', function () {
     fileContent.style.display = 'none';
     clipboardContent.style.display = 'none';
     screenshotContent.style.display = 'none';
+    videoContent.style.display = 'none'; // New
     urlContent.style.display = 'none';
 
     switch (selectedMethod) {
@@ -35,11 +60,14 @@ document.addEventListener('DOMContentLoaded', function () {
         clipboardContent.style.display = 'block';
         break;
       case 'screenshot':
-        screenshotContent.style.display = 'block';
-        break;
-      case 'url':
-        urlContent.style.display = 'block';
-        break;
+      screenshotContent.style.display = 'block';
+      break;
+    case 'video': // New
+      videoContent.style.display = 'block'; // New
+      break; // New
+    case 'url':
+      urlContent.style.display = 'block';
+      break;
     }
   });
 
@@ -171,6 +199,98 @@ document.addEventListener('DOMContentLoaded', function () {
 
   
 
+  let mediaRecorder;
+  let recordedChunks = [];
+  let currentStream;
+
+  startDesktopCaptureButton.addEventListener('click', () => {
+    if (!clientId) {
+      videoStatus.textContent = '最初にImgurのクライアントIDを保存してください。';
+      return;
+    }
+    videoStatus.textContent = '録画するソースを選択中...';
+    chrome.desktopCapture.chooseDesktopMedia(['screen', 'window', 'tab'], (streamId) => {
+      if (chrome.runtime.lastError) {
+        videoStatus.textContent = `ソースの選択に失敗しました: ${chrome.runtime.lastError.message}`;
+        return;
+      }
+      if (!streamId) {
+        videoStatus.textContent = 'ソースの選択がキャンセルされました。';
+        return;
+      }
+      navigator.mediaDevices.getUserMedia({
+        video: {
+          mandatory: {
+            chromeMediaSource: 'desktop',
+            chromeMediaSourceId: streamId,
+            // Constraints for video capture - adjust as needed
+            minWidth: 1280,
+            maxWidth: 1920,
+            minHeight: 720,
+            maxHeight: 1080
+          }
+        },
+        audio: {
+          mandatory: {
+            chromeMediaSource: 'desktop',
+            chromeMediaSourceId: streamId
+          }
+        }
+      }).then((stream) => {
+        currentStream = stream;
+        startRecording(stream);
+      }).catch((error) => {
+        videoStatus.textContent = `録画の開始に失敗しました: ${error.message}`;
+        console.error('Error getting user media:', error);
+      });
+    });
+  });
+
+  stopCaptureButton.addEventListener('click', () => {
+    stopRecording();
+  });
+
+  function startRecording(stream) {
+    recordedChunks = [];
+    mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm; codecs=vp9' }); // Using webm for broader support
+
+    mediaRecorder.ondataavailable = (event) => {
+      if (event.data.size > 0) {
+        recordedChunks.push(event.data);
+      }
+    };
+
+    mediaRecorder.onstop = async () => {
+      videoStatus.textContent = '動画を処理中...';
+      const blob = new Blob(recordedChunks, { type: 'video/webm' });
+      const videoFile = new File([blob], `video-${Date.now()}.webm`, { type: 'video/webm' });
+      
+      // For now, we'll upload as webm. Conversion to GIF/MP4 will be a later step.
+      // Imgur supports webm for video uploads.
+      await handleUpload(videoFile);
+      
+      // Reset UI
+      stopCaptureButton.style.display = 'none';
+      startTabCaptureButton.style.display = 'inline-block';
+      startDesktopCaptureButton.style.display = 'inline-block';
+    };
+
+    mediaRecorder.start();
+    videoStatus.textContent = '録画中...';
+    stopCaptureButton.style.display = 'inline-block';
+    startTabCaptureButton.style.display = 'none';
+    startDesktopCaptureButton.style.display = 'none';
+  }
+
+  function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+      mediaRecorder.stop();
+    }
+    if (currentStream) {
+      currentStream.getTracks().forEach(track => track.stop());
+    }
+  }
+
   async function handleFiles(files) {
     if (!clientId) {
         statusDiv.textContent = '最初にImgurのクライアントIDを保存してください。';
@@ -206,16 +326,20 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   async function handleUpload(source) {
+    const isVideoUpload = source instanceof File && source.type === 'video/webm';
+    const targetStatusDiv = isVideoUpload ? videoStatus : statusDiv;
+
     if (!clientId) {
-      statusDiv.textContent = '最初にImgurのクライアントIDを保存してください。';
+      targetStatusDiv.textContent = '最初にImgurのクライアントIDを保存してください。';
       return;
     }
-    statusDiv.textContent = 'アップロード中...';
+    targetStatusDiv.textContent = 'アップロード中...';
     try {
       await uploadImage(source, clientId);
-      statusDiv.textContent = 'アップロード完了！';
+      targetStatusDiv.textContent = 'アップロード完了！';
     } catch (error) {
-      // The error message is already set by uploadImage
+      targetStatusDiv.textContent = `エラー: ${error.message}`;
+      console.error('Upload failed in handleUpload:', error);
     }
   }
 
@@ -251,9 +375,8 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         })
         .catch(error => {
-            statusDiv.textContent = `エラー: ${error.message}`;
             console.error('Upload failed:', error);
-            reject(error);
+            reject(error); // Just reject the promise, let the caller handle the UI update
         });
     });
   }

@@ -242,19 +242,27 @@ h1 {
     to { opacity: 1; }
 }
 
-.modal-content {
-    display: block;
-    max-width: 95vw; /* Slightly smaller modal image */
+.modal-content-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 95vw;
     max-height: 95vh;
-    width: auto;
-    height: auto;
     margin: auto;
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%) scale(0.98);
+    transform: translate(-50%, -50%);
     animation: zoomIn 0.3s ease forwards;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Simple shadow */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    background-color: #000; /* Black background for media */
+}
+
+.modal-media {
+    display: none; /* Hidden by default, JS will show */
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain; /* Ensure media fits within bounds */
 }
 
 @keyframes zoomIn {

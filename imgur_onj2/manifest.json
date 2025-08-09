@@ -3,12 +3,26 @@
   "name": "Imgur Uploader",
   "version": "1.0",
   "description": "Select an image file to upload to Imgur.",
-  "permissions": ["storage", "activeTab", "scripting", "clipboardRead"],
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "clipboardRead",
+    "tabCapture",
+    "desktopCapture",
+    "sidePanel"
+  ],
   "host_permissions": [
-    "https://api.imgur.com/"
+    "https://api.imgur.com/*"
   ],
   "action": {
     "default_popup": "popup.html"
+  },
+  "side_panel": {
+    "default_path": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
   },
   "options_page": "options.html",
   "web_accessible_resources": [

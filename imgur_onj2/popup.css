@@ -1,6 +1,6 @@
 body {
   font-family: 'Noto Sans JP', sans-serif;
-  width: 380px;
+  min-width: 380px; /* Re-introduce a minimum width for the popup */
   background-color: #f4f7f9;
   color: #333;
   margin: 0;

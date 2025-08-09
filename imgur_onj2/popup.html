@@ -12,6 +12,7 @@
   <div class="container">
     <div class="header">
       <h1>Imgurアップローダー</h1>
+      <button id="open-sidebar-button" class="btn btn-secondary">サイドバーで開く</button>
     </div>
 
     <div class="section">
@@ -20,6 +21,7 @@
         <option value="file">ファイルを選択</option>
         <option value="clipboard">クリップボードから貼り付け</option>
         <option value="screenshot">スクリーンショットを撮る</option>
+        <option value="video">動画をキャプチャ</option>
         <option value="url">URLからアップロード</option>
       </select>
 
@@ -36,6 +38,11 @@
         </div>
         <div id="screenshot-content" style="display: none;">
           <button id="capture-button" class="btn btn-secondary">スクリーンショットを撮る</button>
+        </div>
+        <div id="video-content" style="display: none;">
+          <button id="start-desktop-capture-button" class="btn btn-secondary">デスクトップを録画</button>
+          <button id="stop-capture-button" class="btn btn-secondary" style="display: none;">録画を停止</button>
+          <div id="video-status" class="status-text"></div>
         </div>
         <div id="url-content" style="display: none;">
           <div class="input-group">

@@ -5,10 +5,18 @@ document.addEventListener('DOMContentLoaded', function () {
   const folderSelect = document.getElementById('folder-select');
   const sizeSlider = document.getElementById('size-slider');
 
+  const modal = document.getElementById('myModal');
+  const modalImage = document.getElementById('modalImage');
+  const modalVideo = document.getElementById('modalVideo');
+  const prevButton = document.getElementById('prevButton');
+  const nextButton = document.getElementById('nextButton');
+
   let clientId = '';
   let currentFolder = '未分類';
   let folders = ['未分類'];
   let historyData = [];
+  let filteredHistory = []; // Declare filteredHistory here
+  let currentModalItemIndex = -1; // To keep track of the currently displayed item in modal
 
   // Load initial settings
   chrome.storage.sync.get('imgurClientId', (syncData) => {
@@ -36,6 +44,37 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   // Event Listeners
+  window.onclick = function(event) {
+    if (event.target == modal) {
+      modal.style.display = "none";
+      if (!modalVideo.paused) {
+        modalVideo.pause();
+      }
+    }
+  }
+
+  document.addEventListener('keydown', (event) => {
+    if (modal.style.display === 'block') { // Only navigate if modal is open
+      if (event.key === 'ArrowLeft') {
+        currentModalItemIndex--;
+        displayModalItem(currentModalItemIndex);
+      } else if (event.key === 'ArrowRight') {
+        currentModalItemIndex++;
+        displayModalItem(currentModalItemIndex);
+      }
+    }
+  });
+
+  prevButton.addEventListener('click', () => {
+    currentModalItemIndex--;
+    displayModalItem(currentModalItemIndex);
+  });
+
+  nextButton.addEventListener('click', () => {
+    currentModalItemIndex++;
+    displayModalItem(currentModalItemIndex);
+  });
+
   folderSelect.addEventListener('change', () => {
     currentFolder = folderSelect.value;
     chrome.storage.local.set({ 'currentFolder': currentFolder });
@@ -75,6 +114,35 @@ document.addEventListener('DOMContentLoaded', function () {
       chrome.storage.local.set({ 'uploadHistory': historyData });
   }
 
+  function displayModalItem(index) {
+    if (index < 0 || index >= filteredHistory.length) {
+      return; // Out of bounds
+    }
+
+    const item = filteredHistory[index];
+    currentModalItemIndex = index; // Update the global index
+
+    // Update modal content
+    if (item.link.endsWith('.mp4') || item.link.endsWith('.webm') || item.link.endsWith('.gifv')) {
+      modalImage.style.display = 'none';
+      modalVideo.style.display = 'block';
+      modalVideo.src = item.link;
+      modalVideo.load();
+      modalVideo.play();
+    } else {
+      modalImage.style.display = 'block';
+      modalVideo.style.display = 'none';
+      modalImage.src = item.link;
+      if (!modalVideo.paused) {
+        modalVideo.pause();
+      }
+    }
+
+    // Update button visibility
+    prevButton.style.display = (currentModalItemIndex > 0) ? 'block' : 'none';
+    nextButton.style.display = (currentModalItemIndex < filteredHistory.length - 1) ? 'block' : 'none';
+  }
+
   function renderFolderSelect() {
     folderSelect.innerHTML = '';
     folders.forEach(folder => {
@@ -90,7 +158,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function renderHistory() {
     historyList.innerHTML = '';
-    const filteredHistory = historyData.filter(item => item.folder === currentFolder);
+    filteredHistory = historyData.filter(item => item.folder === currentFolder);
 
     if (filteredHistory.length === 0) {
       historyPlaceholder.style.display = 'block';
@@ -100,16 +168,7 @@ document.addEventListener('DOMContentLoaded', function () {
       historyList.style.display = 'grid';
     }
 
-    const modal = document.getElementById('myModal');
-    const modalImg = document.getElementById('modalImage');
-
-    window.onclick = function(event) {
-      if (event.target == modal) {
-        modal.style.display = "none";
-      }
-    }
-
-    filteredHistory.forEach((item) => {
+    filteredHistory.forEach((item, index) => {
       const li = document.createElement('li');
       li.className = 'history-item';
       li.draggable = true;
@@ -122,7 +181,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       thumbnail.addEventListener('click', () => {
         modal.style.display = "block";
-        modalImg.src = item.link;
+        displayModalItem(index);
       });
 
       const actions = document.createElement('div');

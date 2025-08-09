@@ -15,27 +15,34 @@
     </div>
 
     <div class="section">
-      <label>アップロード</label>
-      
-      <div id="drop-area" class="drop-area">
-        <p>ここにファイルをドラッグ＆ドロップ</p>
-        <label for="image-input" class="btn btn-primary">またはファイルを選択</label>
-        <input type="file" id="image-input" accept="image/*" multiple style="display:none;">
-      </div>
+      <label for="upload-method-select">アップロード方法</label>
+      <select id="upload-method-select" class="styled-select">
+        <option value="file">ファイルを選択</option>
+        <option value="clipboard">クリップボードから貼り付け</option>
+        <option value="screenshot">スクリーンショットを撮る</option>
+        <option value="url">URLからアップロード</option>
+      </select>
 
-      <div class="or-divider">または</div>
-      
-      <button id="paste-upload-button" class="btn btn-secondary">クリップボードから貼り付け</button>
-
-      <div class="or-divider">または</div>
-
-      <button id="capture-button" class="btn btn-secondary">スクリーンショットを撮る</button>
-
-      <div class="or-divider">または</div>
-
-      <div class="input-group">
-        <input type="text" id="url-input" placeholder="画像URLを貼り付け">
-        <button id="url-upload-button" class="btn btn-secondary">URLからアップロード</button>
+      <div id="upload-content-container" class="upload-content">
+        <div id="file-content">
+          <div id="drop-area" class="drop-area">
+            <p>ここにファイルをドラッグ＆ドロップ</p>
+            <label for="image-input" class="btn btn-primary">またはファイルを選択</label>
+            <input type="file" id="image-input" accept="image/*" multiple style="display:none;">
+          </div>
+        </div>
+        <div id="clipboard-content" style="display: none;">
+          <button id="paste-upload-button" class="btn btn-secondary">クリップボードから貼り付け</button>
+        </div>
+        <div id="screenshot-content" style="display: none;">
+          <button id="capture-button" class="btn btn-secondary">スクリーンショットを撮る</button>
+        </div>
+        <div id="url-content" style="display: none;">
+          <div class="input-group">
+            <input type="text" id="url-input" placeholder="画像URLを貼り付け">
+            <button id="url-upload-button" class="btn btn-secondary">URLからアップロード</button>
+          </div>
+        </div>
       </div>
 
       <div id="status" class="status-text"></div>

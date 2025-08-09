@@ -12,6 +12,39 @@ document.addEventListener('DOMContentLoaded', function () {
   const openHistoryButton = document.getElementById('open-history-button');
   const folderSelect = document.getElementById('folder-select');
   const dropArea = document.getElementById('drop-area');
+  const uploadMethodSelect = document.getElementById('upload-method-select');
+  const fileContent = document.getElementById('file-content');
+  const clipboardContent = document.getElementById('clipboard-content');
+  const screenshotContent = document.getElementById('screenshot-content');
+  const urlContent = document.getElementById('url-content');
+
+  // Handle upload method change
+  uploadMethodSelect.addEventListener('change', () => {
+    const selectedMethod = uploadMethodSelect.value;
+
+    fileContent.style.display = 'none';
+    clipboardContent.style.display = 'none';
+    screenshotContent.style.display = 'none';
+    urlContent.style.display = 'none';
+
+    switch (selectedMethod) {
+      case 'file':
+        fileContent.style.display = 'block';
+        break;
+      case 'clipboard':
+        clipboardContent.style.display = 'block';
+        break;
+      case 'screenshot':
+        screenshotContent.style.display = 'block';
+        break;
+      case 'url':
+        urlContent.style.display = 'block';
+        break;
+    }
+  });
+
+  // Set initial state
+  fileContent.style.display = 'block';
 
   let clientId = '';
   let currentFolder = '未分類'; // 現在選択されているフォルダ

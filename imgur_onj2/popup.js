@@ -271,14 +271,12 @@ document.addEventListener('DOMContentLoaded', function () {
       
       // Reset UI
       stopCaptureButton.style.display = 'none';
-      startTabCaptureButton.style.display = 'inline-block';
       startDesktopCaptureButton.style.display = 'inline-block';
     };
 
     mediaRecorder.start();
     videoStatus.textContent = '録画中...';
     stopCaptureButton.style.display = 'inline-block';
-    startTabCaptureButton.style.display = 'none';
     startDesktopCaptureButton.style.display = 'none';
   }
 

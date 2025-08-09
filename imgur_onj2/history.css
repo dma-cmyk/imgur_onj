@@ -338,6 +338,11 @@ h1 {
     background-color: #ffffff; /* White background */
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     text-align: center;
+    /* Centering properties */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 #folderSelectionModal h2 {

@@ -386,6 +386,7 @@ document.addEventListener('DOMContentLoaded', function () {
       history.unshift(uploadWithFolder);
       chrome.storage.local.set({ 'uploadHistory': history }, () => {
         loadHistory();
+        chrome.runtime.sendMessage({ action: 'historyUpdated' }); // Notify history page
       });
     });
   }

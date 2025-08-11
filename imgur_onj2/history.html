@@ -18,11 +18,25 @@
 
     <div class="section">
       <div class="history-header">
-        <select id="folder-select" class="folder-select"></select>
-        <div class="slider-container">
-          <i class="material-icons">photo_size_select_small</i>
-          <input type="range" min="100" max="400" value="250" class="slider" id="size-slider">
-          <i class="material-icons">photo_size_select_large</i>
+        <div class="history-options-group">
+          <select id="folder-select" class="folder-select"></select>
+          <div class="slider-container">
+            <i class="material-icons">photo_size_select_small</i>
+            <input type="range" min="100" max="400" value="250" class="slider" id="size-slider">
+            <i class="material-icons">photo_size_select_large</i>
+          </div>
+        </div>
+        <div class="history-actions-group">
+          <div class="select-all-container">
+            <input type="checkbox" id="select-all-checkbox">
+            <label for="select-all-checkbox">すべて選択</label>
+          </div>
+          <button id="delete-selected-button" class="btn btn-danger btn-small">
+            <i class="material-icons">delete</i> 選択を削除
+          </button>
+          <button id="move-selected-button" class="btn btn-secondary btn-small">
+            <i class="material-icons">folder_move</i> 選択を移動
+          </button>
         </div>
         <button id="clear-history-button" class="btn btn-danger btn-small">
           <i class="material-icons">delete_forever</i>

@@ -54,9 +54,40 @@ h1 {
 
 .history-header {
     display: flex;
+    flex-wrap: wrap; /* 要素が収まらない場合に折り返す */
     align-items: center;
-    gap: 15px;
+    gap: 15px; /* グループ間のスペース */
     margin-bottom: 20px;
+    justify-content: space-between; /* 要素を両端に寄せる */
+}
+
+.history-options-group,
+.history-actions-group {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* グループ内の要素間のスペース */
+}
+
+/* 必要に応じて、ボタンのテキストを非表示にしてアイコンのみにする */
+.history-actions-group .btn i {
+    margin-right: 5px; /* アイコンとテキストの間にスペース */
+}
+
+/* 小さい画面での調整 */
+@media (max-width: 768px) {
+    .history-header {
+        flex-direction: column; /* 縦並びにする */
+        align-items: flex-start; /* 左寄せ */
+    }
+    .history-options-group,
+    .history-actions-group {
+        width: 100%; /* 幅を100%にする */
+        justify-content: space-between; /* グループ内で要素を両端に寄せる */
+        margin-bottom: 10px; /* グループ間の縦方向のスペース */
+    }
+    .slider-container {
+        flex-grow: 0; /* スライダーが幅を取りすぎないように */
+    }
 }
 
 .slider-container {
@@ -224,7 +255,39 @@ h1 {
     opacity: 0.9;
 }
 
-/* Modal styles */
+/* Message Modal Specific Styles */
+#messageModal .modal-content {
+    max-width: 400px;
+    padding: 25px;
+    border-radius: 8px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    text-align: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#messageModal h2 {
+    color: #333333;
+    font-size: 22px;
+    margin-bottom: 15px;
+}
+
+#messageModal p {
+    color: #555555;
+    font-size: 16px;
+    margin-bottom: 25px;
+}
+
+.message-modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+/* General Modal styles */
 .modal {
     display: none;
     position: fixed;

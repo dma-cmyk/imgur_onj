@@ -627,4 +627,13 @@ document.addEventListener('DOMContentLoaded', function () {
         statusDiv.textContent = `エラー: ${error.message}`;
     });
   }
+
+  // Listen for changes in storage to update folders in real-time
+  chrome.storage.onChanged.addListener((changes, namespace) => {
+    if (namespace === 'local' && changes.imgurFolders) {
+      folders = changes.imgurFolders.newValue;
+      renderFolderSelect();
+      loadHistory(); // Reload history to update individual dropdowns
+    }
+  });
 });

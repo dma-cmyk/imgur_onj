@@ -380,12 +380,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // --- Event Listeners ---
 
+  closeFolderModalButton.addEventListener('click', () => {
+    folderSelectionModal.style.display = "none";
+  });
+
   window.onclick = function(event) {
     if (event.target == modal) {
       modal.style.display = "none";
       if (!modalVideo.paused) {
         modalVideo.pause();
       }
+    }
+    if (event.target == folderSelectionModal) {
+      folderSelectionModal.style.display = "none";
     }
   }
 
@@ -442,10 +449,10 @@ document.addEventListener('DOMContentLoaded', function () {
     selectedItems.clear();
     checkboxes.forEach(checkbox => {
       checkbox.checked = isChecked;
-      const link = checkbox.dataset.link;
+      const deletehash = checkbox.dataset.deletehash;
       const folder = checkbox.dataset.folder;
       if (isChecked) {
-        selectedItems.add(JSON.stringify({ link, folder }));
+        selectedItems.add(JSON.stringify({ deletehash, folder }));
       }
     });
     updateDeleteSelectedButtonState();

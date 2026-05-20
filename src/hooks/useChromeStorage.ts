@@ -84,6 +84,16 @@ export function useChromeStorage() {
     saveHistory(newHistory);
   };
 
+  const updateItem = (link: string, updates: Partial<UploadItem>) => {
+    const newHistory = history.map(item => {
+      if (item.link === link) {
+        return { ...item, ...updates };
+      }
+      return item;
+    });
+    saveHistory(newHistory);
+  };
+
   const saveAllTags = (newTags: string[]) => {
     chrome.storage.local.set({ imgurTags: newTags }, () => setAllTags(newTags));
   };
@@ -114,6 +124,7 @@ export function useChromeStorage() {
     loading,
     saveHistory,
     deleteItem,
+    updateItem,
     removeTagFromItem,
     saveAllTags,
     saveCurrentFilterTag,

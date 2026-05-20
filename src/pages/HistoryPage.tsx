@@ -17,7 +17,9 @@ import {
   MessageSquarePlus,
   Play,
   Info,
-  Tag as TagIcon
+  Tag as TagIcon,
+  Pencil,
+  Check
 } from 'lucide-react';
 import type { UploadItem } from '../types';
 
@@ -29,6 +31,7 @@ export function HistoryPage() {
     loading,
     saveHistory,
     deleteItem,
+    updateItem,
     removeTagFromItem
   } = useChromeStorage();
 
@@ -37,6 +40,9 @@ export function HistoryPage() {
   const [thumbnailSize, setThumbnailSize] = useState(200);
   const [searchQuery, setSearchQuery] = useState('');
   const [modalItem, setModalItem] = useState<UploadItem | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
 
   const [confirmState, setConfirmState] = useState<{
     isOpen: boolean;
@@ -76,6 +82,27 @@ export function HistoryPage() {
   const toggleSelectAll = () => {
     if (selectedLinks.size === filteredHistory.length) setSelectedLinks(new Set());
     else setSelectedLinks(new Set(filteredHistory.map(i => i.link)));
+  };
+
+  const openModal = (item: UploadItem) => {
+    setModalItem(item);
+    setEditTitle(item.title || '');
+    setEditDescription(item.aiDescription || '');
+    setIsEditing(false);
+  };
+
+  const handleSaveEdit = () => {
+    if (!modalItem) return;
+    updateItem(modalItem.link, {
+      title: editTitle,
+      aiDescription: editDescription
+    });
+    setModalItem({
+      ...modalItem,
+      title: editTitle,
+      aiDescription: editDescription
+    });
+    setIsEditing(false);
   };
 
   const handleDelete = (items: UploadItem[]) => {
@@ -173,7 +200,7 @@ export function HistoryPage() {
 
       <div className="history-grid" style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${thumbnailSize}px, 1fr))` }}>
         {filteredHistory.map((item) => (
-          <div key={item.link} className={`img-card ${selectedLinks.has(item.link) ? 'selected' : ''}`} onClick={() => setModalItem(item)} style={{ cursor: 'zoom-in', outline: selectedLinks.has(item.link) ? '4px solid var(--primary)' : 'none' }}>
+          <div key={item.link} className={`img-card ${selectedLinks.has(item.link) ? 'selected' : ''}`} onClick={() => openModal(item)} style={{ cursor: 'zoom-in', outline: selectedLinks.has(item.link) ? '4px solid var(--primary)' : 'none' }}>
             <img src={item.link.replace('.mp4', '.png').replace('.gifv', '.png')} alt={item.title} loading="lazy" />
             {isVideo(item.link) && <div style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.6)', borderRadius: 4, padding: 4, zIndex: 5 }}><Play size={14} color="white" fill="white" /></div>}
             {item.title && <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(0,0,0,0.7)', color: 'white', fontSize: '0.75rem', padding: '4px 8px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.title}</div>}
@@ -195,7 +222,32 @@ export function HistoryPage() {
             </div>
 
             <div style={{ marginTop: 12, background: 'var(--bg-main)', padding: '16px', borderRadius: '12px', textAlign: 'left' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}><Info size={18} color="var(--primary)" /><strong style={{ fontSize: '1.1rem' }}>{modalItem.title || '無題'}</strong></div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
+                  <Info size={18} color="var(--primary)" />
+                  {isEditing ? (
+                    <input 
+                      type="text"
+                      className="styled-input" 
+                      value={editTitle} 
+                      onChange={(e) => setEditTitle(e.target.value)} 
+                      placeholder="タイトルを入力..."
+                      style={{ marginBottom: 0, padding: '4px 8px', flex: 1 }}
+                    />
+                  ) : (
+                    <strong style={{ fontSize: '1.1rem' }}>{modalItem.title || '無題'}</strong>
+                  )}
+                </div>
+                <button 
+                  className="btn btn-secondary" 
+                  onClick={() => setIsEditing(!isEditing)}
+                  style={{ padding: '4px 10px', fontSize: '0.8rem' }}
+                  title={isEditing ? 'キャンセル' : '編集'}
+                >
+                  {isEditing ? <><X size={14} /> やめる</> : <><Pencil size={14} /> 編集</>}
+                </button>
+              </div>
+
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '12px' }}>
                 {modalItem.tags.map(t => (
                   <span key={t} style={{ fontSize: '0.7rem', background: 'var(--border)', padding: '2px 10px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -207,7 +259,29 @@ export function HistoryPage() {
                   </span>
                 ))}
               </div>
-              {modalItem.aiDescription && <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', borderTop: '1px solid var(--border)', paddingTop: '10px' }}>{modalItem.aiDescription}</p>}
+
+              {isEditing ? (
+                <div style={{ marginTop: '10px' }}>
+                  <label style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>AI説明文</label>
+                  <textarea 
+                    className="styled-input" 
+                    value={editDescription} 
+                    onChange={(e) => setEditDescription(e.target.value)} 
+                    placeholder="説明を入力..."
+                    style={{ width: '100%', minHeight: '100px', resize: 'vertical' }}
+                  />
+                </div>
+              ) : (
+                modalItem.aiDescription && <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', borderTop: '1px solid var(--border)', paddingTop: '10px' }}>{modalItem.aiDescription}</p>
+              )}
+
+              {isEditing && (
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '12px' }}>
+                  <button className="btn btn-primary" onClick={handleSaveEdit}>
+                    <Check size={16} /> 保存する
+                  </button>
+                </div>
+              )}
             </div>
 
             <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center', gap: '12px', width: '100%' }}>

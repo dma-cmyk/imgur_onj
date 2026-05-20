@@ -26,7 +26,9 @@ import {
   AlertTriangle,
   Info,
   ChevronRight,
-  Tag as TagIcon
+  Tag as TagIcon,
+  Pencil,
+  Check
 } from 'lucide-react';
 
 export function PopupPage() {
@@ -40,6 +42,7 @@ export function PopupPage() {
     saveHistory, 
     saveCurrentFilterTag,
     deleteItem,
+    updateItem,
     removeTagFromItem
   } = useChromeStorage();
 
@@ -54,6 +57,9 @@ export function PopupPage() {
   
   const [confirmDelete, setConfirmDelete] = useState<any | null>(null);
   const [previewItem, setPreviewItem] = useState<any | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
   const [aiPendingItem, setAiPendingItem] = useState<{ file: File | Blob, analysis: AIAnalysisResult } | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -164,6 +170,28 @@ export function PopupPage() {
     });
   };
 
+  const handleOpenPreview = (item: any) => {
+    setPreviewItem(item);
+    setEditTitle(item.title || '');
+    setEditDescription(item.aiDescription || '');
+    setIsEditing(false);
+  };
+
+  const handleSaveEdit = () => {
+    if (!previewItem) return;
+    updateItem(previewItem.link, {
+      title: editTitle,
+      aiDescription: editDescription
+    });
+    setPreviewItem({
+      ...previewItem,
+      title: editTitle,
+      aiDescription: editDescription
+    });
+    setIsEditing(false);
+    updateStatus('保存しました', 'success');
+  };
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     updateStatus('コピーしました！', 'success');
@@ -271,7 +299,7 @@ export function PopupPage() {
 
           <div className="history-grid" style={{ gridTemplateColumns: isSidePanel ? 'repeat(auto-fill, minmax(100px, 1fr))' : 'repeat(3, 1fr)' }}>
             {filteredHistory.slice(0, 15).map((item) => (
-              <div key={item.link} className="img-card shadow-sm" onClick={() => setPreviewItem(item)}>
+              <div key={item.link} className="img-card shadow-sm" onClick={() => handleOpenPreview(item)}>
                 <img src={item.link.replace('.mp4', '.png').replace('.gifv', '.png')} alt="" loading="lazy" />
                 {isVideo(item.link) && <div style={{ position: 'absolute', top: 4, right: 4, background: 'rgba(0,0,0,0.6)', borderRadius: 4, padding: 2 }}><Play size={10} color="white" fill="white" /></div>}
                 {item.title && <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(0,0,0,0.6)', color: 'white', fontSize: '0.6rem', padding: '2px 4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.title}</div>}
@@ -309,8 +337,33 @@ export function PopupPage() {
             <div style={{ background: '#000', borderRadius: 8, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 100 }}>
               {isVideo(previewItem.link) ? <video src={getMediaUrl(previewItem.link)} controls autoPlay loop muted style={{ width: '100%', maxHeight: '60vh' }} /> : <img src={previewItem.link} alt="" style={{ width: '100%', maxHeight: '60vh', objectFit: 'contain' }} />}
             </div>
-            <div style={{ marginTop: 12, background: 'var(--bg-main)', padding: '12px', borderRadius: '12px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}><Info size={14} color="var(--primary)" /><strong>{previewItem.title || '無題'}</strong></div>
+            <div style={{ marginTop: 12, background: 'var(--bg-main)', padding: '12px', borderRadius: '12px', width: '100%', textAlign: 'left' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1 }}>
+                  <Info size={14} color="var(--primary)" />
+                  {isEditing ? (
+                    <input 
+                      type="text"
+                      className="styled-input" 
+                      value={editTitle} 
+                      onChange={(e) => setEditTitle(e.target.value)} 
+                      placeholder="タイトルを入力..."
+                      style={{ marginBottom: 0, padding: '4px 8px', fontSize: '0.8rem', flex: 1 }}
+                    />
+                  ) : (
+                    <strong style={{ fontSize: '0.9rem' }}>{previewItem.title || '無題'}</strong>
+                  )}
+                </div>
+                <button 
+                  className="btn btn-secondary" 
+                  onClick={() => setIsEditing(!isEditing)}
+                  style={{ padding: '2px 8px', fontSize: '0.75rem' }}
+                  title={isEditing ? 'キャンセル' : '編集'}
+                >
+                  {isEditing ? <><X size={12} /> やめる</> : <><Pencil size={12} /> 編集</>}
+                </button>
+              </div>
+
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '8px' }}>
                 {previewItem.tags.map((t: string) => (
                   <span key={t} style={{ fontSize: '0.65rem', background: 'var(--border)', padding: '2px 8px', borderRadius: '10px', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -322,7 +375,29 @@ export function PopupPage() {
                   </span>
                 ))}
               </div>
-              {previewItem.aiDescription && <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', borderTop: '1px solid var(--border)', paddingTop: '8px' }}>{previewItem.aiDescription}</p>}
+              
+              {isEditing ? (
+                <div style={{ marginTop: '8px' }}>
+                  <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)', display: 'block', marginBottom: '2px' }}>AI説明文</label>
+                  <textarea 
+                    className="styled-input" 
+                    value={editDescription} 
+                    onChange={(e) => setEditDescription(e.target.value)} 
+                    placeholder="説明を入力..."
+                    style={{ width: '100%', minHeight: '60px', resize: 'vertical', fontSize: '0.75rem' }}
+                  />
+                </div>
+              ) : (
+                previewItem.aiDescription && <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', borderTop: '1px solid var(--border)', paddingTop: '8px' }}>{previewItem.aiDescription}</p>
+              )}
+
+              {isEditing && (
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
+                  <button className="btn btn-primary" style={{ padding: '4px 12px', fontSize: '0.75rem' }} onClick={handleSaveEdit}>
+                    <Check size={14} /> 保存する
+                  </button>
+                </div>
+              )}
             </div>
             <div style={{ marginTop: 16, display: 'flex', gap: 8, width: '100%' }}>
               <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => { handlePasteToOnJ(previewItem.link); setPreviewItem(null); }}><MessageSquarePlus size={16} /> 貼り付け</button>

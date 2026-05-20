@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Imgur Uploader",
+  "name": "Imgur Uploader React",
   "version": "1.0",
-  "description": "Select an image file to upload to Imgur.",
+  "description": "Select an image file to upload to Imgur. Powered by React.",
   "permissions": [
     "storage",
     "activeTab",
@@ -33,7 +33,8 @@
     "default_path": "popup.html"
   },
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "src/background.ts",
+    "type": "module"
   },
   "options_page": "options.html",
   "web_accessible_resources": [

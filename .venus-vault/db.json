@@ -1,0 +1,90 @@
+[
+  {
+    "id": "imgur-onj-overview",
+    "title": "Imgur ONJ React：概要",
+    "content": "# Imgur ONJ React 🚀\n\nおんJ民による、おんJ民のための、最強Imgurアップローダーです。\nReact 19 + TypeScript + Vite 6 + `@crxjs/vite-plugin` で開発された次世代のChrome拡張機能。\n\n## 📦 技術スタック\n- **フロントエンド**: React 19.2.6, TypeScript 6.0.2, Lucide React\n- **ビルドツール**: Vite 8.0.12, @crxjs/vite-plugin 2.0.0-beta.33\n- **AI統合**: Google Gemini API (@google/generative-ai 0.24.1)\n- **画像API**: Imgur API v3\n\n## 📂 主要ディレクトリ構成\n- `src/popup/` / `src/pages/PopupPage.tsx`: メインアップロードUI (サイドパネル兼用)\n- `src/options/` / `src/pages/OptionsPage.tsx`: 設定画面 (APIキー設定等)\n- `src/history/` / `src/pages/HistoryPage.tsx`: アップロード履歴とセマンティック検索\n- `src/lib/`: APIクライアント層 (`gemini.ts`, `imgur.ts`, `onj.ts`)",
+    "category": "概要",
+    "tags": [
+      "概要",
+      "プロジェクト",
+      "React",
+      "Vite"
+    ],
+    "created_at": "2026-05-29T00:33:00.000Z",
+    "updated_at": "2026-05-29T00:33:00.000Z",
+    "relations": [
+      "imgur-onj-features",
+      "imgur-onj-ai",
+      "imgur-onj-onj-features",
+      "imgur-onj-todos"
+    ]
+  },
+  {
+    "id": "imgur-onj-features",
+    "title": "Imgur ONJ React：アップロード機能",
+    "content": "# 多彩なアップロード機能\n\nメインUIである [[Imgur ONJ React：概要|PopupPage.tsx]] から、様々な方法で画像をアップロードできます。\n\n## 🛠 アップロード方法\n- **ファイル選択 & ドロップ**: ローカルファイルをドラッグしてアップロード。\n- **クリップボード貼り付け**: スクショ等をコピーして、ペースト (`Ctrl+V`) するだけでアップロード。\n- **タブキャプチャ**: 表示中のアクティブタブを丸ごと撮影してアップロード。\n- **動画キャプチャ**: デスクトップや特定のウィンドウを録画して共有。\n- **URLインポート**: ネット上の画像URLを入力してImgurに転送。\n\n## 🔗 処理ロジック (`src/lib/imgur.ts`)\n- `uploadImageToImgur(fileOrBase64, clientId)`: ファイルまたはBase64データをImgur API v3に送信。\n- アップロード成功時に履歴 (`chrome.storage.local`) にURLとメタデータを保存。",
+    "category": "機能",
+    "tags": [
+      "機能",
+      "アップロード",
+      "Imgur"
+    ],
+    "created_at": "2026-05-29T00:33:00.000Z",
+    "updated_at": "2026-05-29T00:33:00.000Z",
+    "relations": [
+      "imgur-onj-overview",
+      "imgur-onj-ai"
+    ]
+  },
+  {
+    "id": "imgur-onj-ai",
+    "title": "Imgur ONJ React：Gemini AI連携",
+    "content": "# Google Gemini AI による付加価値機能\n\nGoogle AI StudioのAPIキーを設定することで、強力なAI機能が利用可能です。\n\n## 🤖 主なAI機能\n- **個人情報の自動マスク**: 名前・住所・顔などの個人情報をAIが検知し、アップロード前に自動でモザイク（マスキング）をかけます。\n- **自動タグ・タイトル生成**: 画像を分析して、自動的に適切なタイトルと3〜5個のタグをImgur側にセット。\n- **セマンティック検索**: 画像の説明文をAIが生成して保存するため、履歴から「猫」「おもしろい」などの自然言語で画像を意味的に検索できます。\n\n## 🔗 処理ロジック (`src/lib/gemini.ts`)\n- `analyzeImage(file, apiKey, modelName, existingTags)`: 画像の内容を分析。\n- `redactImage(file, areas)`: 検出された個人情報領域を黒塗り（AI PROTECTED）でマスキングした新しいBlobを出力。",
+    "category": "機能",
+    "tags": [
+      "AI",
+      "Gemini",
+      "セマンティック検索"
+    ],
+    "created_at": "2026-05-29T00:33:00.000Z",
+    "updated_at": "2026-05-29T00:33:00.000Z",
+    "relations": [
+      "imgur-onj-overview",
+      "imgur-onj-features",
+      "imgur-onj-todos"
+    ]
+  },
+  {
+    "id": "imgur-onj-onj-features",
+    "title": "Imgur ONJ React：おんJ特化機能",
+    "content": "# おんJ（おーぷん2ch）での書き込みを劇的に楽にする機能\n\n掲示板での画像共有をスムーズにするための特化機能が実装されています。\n\n## ☘️ 主な特化機能\n- **ワンクリック自動貼り付け**:\n  アップロード履歴画面（[[Imgur ONJ React：概要|HistoryPage.tsx]]）でおんJのURLが表示されている場合、ボタンを押すだけで現在アクティブなおーぷん2chの書き込み欄に、画像のImgur URLを自動的に流し込みます。\n- **サイドパネル最適化**:\n  Chromeサイドパネルとして起動した際、掲示板を見ながら並行して画像をサクサクアップロードできるように、ボーダレスでコンパクトなUIデザインが採用されています。\n\n## 🔗 処理ロジック (`src/lib/onj.ts`)\n- `pasteToOpen2ch(link)`: アクティブタブがおーぷん2chの場合、`chrome.scripting.executeScript` を通じてテキストエリア `textarea[name=\"MESSAGE\"]` にURLを自動入力します。",
+    "category": "機能",
+    "tags": [
+      "おんJ",
+      "おーぷん2ch",
+      "連携"
+    ],
+    "created_at": "2026-05-29T00:33:00.000Z",
+    "updated_at": "2026-05-29T00:33:00.000Z",
+    "relations": [
+      "imgur-onj-overview"
+    ]
+  },
+  {
+    "id": "imgur-onj-todos",
+    "title": "Imgur ONJ React：今後の修正・課題",
+    "content": "# 今後の修正検討と改善Todo\n\n美緒ちゃんから依頼された「imgur_onjの修正」に向けて整理した課題リストです。\n\n## 🛠 技術的な課題と修正候補\n1. **CRXJS と Vite 6/8 の互換性問題**:\n   - `manifest.json` を Vite でビルドする際、`@crxjs/vite-plugin` が Vite の最新の内部API変更と競合し、ビルドエラーやHMR（ホットリロード）の不調が起きやすい。プラグインの代替案や設定の調整を検討。\n2. **モザイク処理（ピクセル化）の改善**:\n   - 現在の `redactImage` (src/lib/gemini.ts) は検知エリアを「黒塗り + AI PROTECTED の文字」でマスクするだけのシンプルな実装になっている。これをもっと綺麗で自然な「モザイク（ピクセル化）処理」や「ぼかし処理」に変更してデザイン品質を向上させる。\n3. **Gemini エイリアスモデルの導入（対応済み）**:\n   - 常に最新の安定版モデルが自動で参照されるように、デフォルトモデルを **`gemini-flash-latest`** エイリアスへ移行しました。また、有料版制限のあるProモデルは除外し、フォールバックリストも `gemini-flash-latest / gemini-flash-lite-latest` の軽量かつ強力な無料枠エイリアス群のみにアップデート完了しています。\n4. **無限スクロール（インフィニットスクロール）の実装（対応済み）**:\n   - ポップアップやサイドバー表示時、履歴件数が多い場合に古い画像が表示されない課題を解決するため、スクロールに応じて15件ずつ自動で追加読み込み（表示）する無限スクロール機構を [[PopupPage.tsx]] に実装しました。\n5. **データのバックアップと移行機能の実装（対応済み）**:\n   - 別の環境やデバイスでも削除キー（deletehash）やアップロード履歴、設定値をそのまま引き継いで使えるように、設定画面（[[OptionsPage.tsx]]）にJSON形式でのエクスポート・インポート（バックアップと復元）機能を追加しました。インポート時には「マージ（追加）」か「上書き（置換）」を選択できます。\n6. **動画キャプチャの安定化**:\n   - `desktopCapture` API を使用した際のパーミッション警告の挙動や、キャプチャ後のファイル形式（WebMからMP4への変換など）の改善。\n7. **エラーハンドリングの強化**:\n   - Imgurのレートリミット到達時や、APIキー未登録時のエラー表示をユーザーにわかりやすくする。",
+    "category": "課題",
+    "tags": [
+      "課題",
+      "Todo",
+      "バグ修正"
+    ],
+    "created_at": "2026-05-29T00:33:00.000Z",
+    "updated_at": "2026-05-29T00:46:00.000Z",
+    "relations": [
+      "imgur-onj-overview",
+      "imgur-onj-ai"
+    ]
+  }
+]

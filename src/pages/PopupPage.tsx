@@ -61,6 +61,19 @@ export function PopupPage() {
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
   const [aiPendingItem, setAiPendingItem] = useState<{ file: File | Blob, analysis: AIAnalysisResult } | null>(null);
+  const [visibleCount, setVisibleCount] = useState(15);
+
+  const filteredHistory = history.filter(item => {
+    const matchesTag = currentFilterTag === 'すべて' || item.tags.includes(currentFilterTag);
+    const q = searchQuery.toLowerCase();
+    const matchesSearch = !q || (
+      item.link.toLowerCase().includes(q) || 
+      item.title?.toLowerCase().includes(q) ||
+      item.aiDescription?.toLowerCase().includes(q) ||
+      item.tags.some(t => t.toLowerCase().includes(q))
+    );
+    return matchesTag && matchesSearch;
+  });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -81,6 +94,45 @@ export function PopupPage() {
     window.addEventListener('resize', checkView);
     return () => window.removeEventListener('resize', checkView);
   }, []);
+
+  // Reset visible count when filter or search changes
+  useEffect(() => {
+    setVisibleCount(15);
+  }, [currentFilterTag, searchQuery]);
+
+  // Infinite scroll handler
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollHeight = document.documentElement.scrollHeight;
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      const clientHeight = window.innerHeight;
+      
+      if (scrollHeight - scrollTop <= clientHeight + 100) {
+        setVisibleCount(prev => Math.min(prev + 15, filteredHistory.length));
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
+    // Fallback scroll listener for container-based scrolling (like .app-main)
+    const mainEl = document.querySelector('.app-main');
+    const handleMainScroll = (e: Event) => {
+      const target = e.target as HTMLElement;
+      if (target.scrollHeight - target.scrollTop <= target.clientHeight + 100) {
+        setVisibleCount(prev => Math.min(prev + 15, filteredHistory.length));
+      }
+    };
+    if (mainEl) {
+      mainEl.addEventListener('scroll', handleMainScroll);
+    }
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (mainEl) {
+        mainEl.removeEventListener('scroll', handleMainScroll);
+      }
+    };
+  }, [filteredHistory.length]);
 
   const updateStatus = (text: string, type: 'success' | 'error' | 'info' | 'warning' | null = 'info') => {
     setStatus({ text, type });
@@ -216,17 +268,6 @@ export function PopupPage() {
     }
   };
 
-  const filteredHistory = history.filter(item => {
-    const matchesTag = currentFilterTag === 'すべて' || item.tags.includes(currentFilterTag);
-    const q = searchQuery.toLowerCase();
-    const matchesSearch = !q || (
-      item.link.toLowerCase().includes(q) || 
-      item.title?.toLowerCase().includes(q) ||
-      item.aiDescription?.toLowerCase().includes(q) ||
-      item.tags.some(t => t.toLowerCase().includes(q))
-    );
-    return matchesTag && matchesSearch;
-  });
 
   const getMediaUrl = (link: string) => link.endsWith('.gifv') ? link.replace('.gifv', '.mp4') : link;
   const isVideo = (link: string) => link.endsWith('.mp4') || link.endsWith('.webm') || link.endsWith('.gifv');
@@ -298,7 +339,7 @@ export function PopupPage() {
           </div>
 
           <div className="history-grid" style={{ gridTemplateColumns: isSidePanel ? 'repeat(auto-fill, minmax(100px, 1fr))' : 'repeat(3, 1fr)' }}>
-            {filteredHistory.slice(0, 15).map((item) => (
+            {filteredHistory.slice(0, visibleCount).map((item) => (
               <div key={item.link} className="img-card shadow-sm" onClick={() => handleOpenPreview(item)}>
                 <img src={item.link.replace('.mp4', '.png').replace('.gifv', '.png')} alt="" loading="lazy" />
                 {isVideo(item.link) && <div style={{ position: 'absolute', top: 4, right: 4, background: 'rgba(0,0,0,0.6)', borderRadius: 4, padding: 2 }}><Play size={10} color="white" fill="white" /></div>}

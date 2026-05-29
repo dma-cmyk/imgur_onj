@@ -9,7 +9,7 @@ export interface AIAnalysisResult {
 
 export async function analyzeImage(file: File | Blob, apiKey: string, modelName: string, existingTags: string[]): Promise<AIAnalysisResult> {
   const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: modelName || "gemini-1.5-flash" });
+  const model = genAI.getGenerativeModel({ model: modelName || "gemini-flash-latest" });
 
   const base64Data = await new Promise<string>((resolve) => {
     const reader = new FileReader();
@@ -65,13 +65,13 @@ export async function analyzeImage(file: File | Blob, apiKey: string, modelName:
 export async function getAvailableModels(apiKey: string): Promise<string[]> {
   try {
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
-    if (!response.ok) return ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash-exp"];
+    if (!response.ok) return ["gemini-flash-latest", "gemini-flash-lite-latest"];
     const data = await response.json();
     return data.models
       .filter((m: any) => m.supportedGenerationMethods.includes("generateContent"))
       .map((m: any) => m.name.replace('models/', ''));
   } catch (err) {
-    return ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash-exp"];
+    return ["gemini-flash-latest", "gemini-flash-lite-latest"];
   }
 }
 

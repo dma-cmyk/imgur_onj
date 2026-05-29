@@ -16,7 +16,10 @@
       "imgur-onj-features",
       "imgur-onj-ai",
       "imgur-onj-onj-features",
-      "imgur-onj-todos"
+      "imgur-onj-todos",
+      "imgur-onj-history",
+      "imgur-onj-architecture",
+      "imgur-onj-data-management"
     ]
   },
   {
@@ -84,7 +87,67 @@
     "updated_at": "2026-05-29T00:46:00.000Z",
     "relations": [
       "imgur-onj-overview",
-      "imgur-onj-ai"
+      "imgur-onj-ai",
+      "imgur-onj-history",
+      "imgur-onj-architecture",
+      "imgur-onj-data-management"
+    ]
+  },
+  {
+    "id": "imgur-onj-history",
+    "title": "Imgur ONJ React：履歴管理とセマンティック検索",
+    "content": "# 履歴管理とセマンティック検索\n\n[[HistoryPage.tsx]] は、アップロードした画像の一覧表示、管理、および高度な検索機能を提供します。\n\n## 🔍 擬似セマンティック検索\n本拡張機能の「セマンティック検索」は、ローカルでの高速なテキスト検索をベースにしています。\n- **仕組み**: アップロード時に [[Imgur ONJ React：Gemini AI連携|Gemini AI]] が生成した「タイトル」「AI説明文（aiDescription）」「提案タグ」が履歴に保存されています。\n- **効果**: ユーザーが「猫」「ラーメン」「スクショ」などのキーワードで検索した際、画像そのもののメタデータ（説明文など）を検索対象にすることで、高度な意味的（セマンティック）検索を瞬時かつ完全にローカルで実行できます。\n\n## 🛠 履歴の管理機能\n- **バッチ操作**: 複数項目を選択して、一括でImgurから削除（削除キー `deletehash` を使用）したり、一括で新しいタグを追加したりできます。\n- **UXカスタマイズ**: スライダーを用いてサムネイルの表示サイズ（120px〜400px）をリアルタイムに変更可能です。\n- **ワンクリック貼り付け**: おんJへのワンクリック転送や、クリップボードへの画像URLコピーが各画像カードから直接実行できます。",
+    "category": "機能",
+    "tags": [
+      "機能",
+      "履歴",
+      "検索",
+      "セマンティック検索"
+    ],
+    "created_at": "2026-05-29T01:00:00.000Z",
+    "updated_at": "2026-05-29T01:00:00.000Z",
+    "relations": [
+      "imgur-onj-overview",
+      "imgur-onj-ai",
+      "imgur-onj-architecture"
+    ]
+  },
+  {
+    "id": "imgur-onj-architecture",
+    "title": "Imgur ONJ React：状態同期と拡張機能アーキテクチャ",
+    "content": "# 画面間のリアルタイム状態同期\n\nChrome拡張機能は、Popup、Sidebar、Options、Historyなどの各画面が独立した独立のHTML・DOMインスタンスとして動作します。そのため、ある画面でのデータ更新を他画面へリアルタイムに反映する設計が必要になります。\n\n## 🔄 同期メカニズム (`src/hooks/useChromeStorage.ts`)\n本拡張機能は、Reactカスタムフック `useChromeStorage` を用いて、どの画面からでも同じ状態にアクセスし同期できる仕組みを持っています。\n- **自動同期 (`chrome.storage.onChanged`)**:\n  `chrome.storage.local` または `chrome.storage.sync` の値が変更された際、イベントリスナーが発火して自動的にローカルの React state が再読み込みされます。\n- **メッセージング同期 (`chrome.runtime`)**:\n  データ保存時（`saveHistory`）に、`chrome.runtime.sendMessage({ action: 'historyUpdated' })` を呼び出します。\n  [[background.ts|サービスワーカー]] はこのメッセージを受け取り、開いているすべての `history.html` タブに対し `refreshHistory` メッセージをブロードキャストして、画面の表示を強制的に最新化します。\n\n## 📡 サービスワーカーの役割 (`src/background.ts`)\n- **サイドパネル制御**: PopupPageから送られた `openSidePanel` メッセージに基づき、`chrome.sidePanel.open` を実行してサイドパネルをスマートに開きます。\n- **イベント仲介**: バックグラウンドで常に待機し、画面間の通信を仲介します。",
+    "category": "設計",
+    "tags": [
+      "設計",
+      "Chrome拡張機能",
+      "状態管理",
+      "同期"
+    ],
+    "created_at": "2026-05-29T01:00:00.000Z",
+    "updated_at": "2026-05-29T01:00:00.000Z",
+    "relations": [
+      "imgur-onj-overview",
+      "imgur-onj-history",
+      "imgur-onj-data-management"
+    ]
+  },
+  {
+    "id": "imgur-onj-data-management",
+    "title": "Imgur ONJ React：データの永続化とバックアップ",
+    "content": "# データの永続化とバックアップ設計\n\n本拡張機能のデータ保存の仕組み、および他デバイスへの移行メカニズムについて解説します。\n\n## 📦 ストレージの使い使い分け\n- **`chrome.storage.sync` (クラウド同期)**:\n  - 保存対象: `imgurClientId`, `geminiApiKey`, `geminiModel`（設定値）\n  - 特徴: Googleアカウントに紐づいて別端末のChromeブラウザ間でも自動で同期されます（上限容量が小さいため、少量の設定情報に最適）。\n- **`chrome.storage.local` (ローカル永続化)**:\n  - 保存対象: `uploadHistory` (アップロード履歴), `imgurTags` (タグ一覧), `currentFilterTag` (選択中のフィルタ)\n  - 特徴: 端末のローカルに保存され、大容量の履歴データや削除キーの保存に適しています。\n\n## 💾 バックアップと移行機能 (`src/pages/OptionsPage.tsx`)\nユーザーが別環境へ安全に移行できるように、JSON形式でのインポート/エクスポートが実装されています。\n- **エクスポート**: 履歴とタグをJSON化。APIキー等の設定情報をファイルに含めるか選択でき、セキュリティに配慮した警告表示を実装。\n- **インポート時のモード設計**:\n  - **追加 (マージ)**: 現在のローカル履歴に、インポートした履歴を結合します。重複リンクは自動で排除されます。\n  - **上書き (置換)**: 現在のローカル履歴を完全にファイルの履歴で置き換えます。\n  - **設定復元**: ファイル内に設定キーが存在する場合のみ、設定値も上書き復元することが選択可能です。",
+    "category": "設計",
+    "tags": [
+      "設計",
+      "バックアップ",
+      "ストレージ",
+      "セキュリティ"
+    ],
+    "created_at": "2026-05-29T01:00:00.000Z",
+    "updated_at": "2026-05-29T01:00:00.000Z",
+    "relations": [
+      "imgur-onj-overview",
+      "imgur-onj-architecture",
+      "imgur-onj-todos"
     ]
   }
 ]

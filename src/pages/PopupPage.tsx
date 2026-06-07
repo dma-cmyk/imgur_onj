@@ -107,7 +107,7 @@ export function PopupPage() {
       const scrollTop = window.scrollY || document.documentElement.scrollTop;
       const clientHeight = window.innerHeight;
       
-      if (scrollHeight - scrollTop <= clientHeight + 100) {
+      if (scrollHeight - scrollTop <= clientHeight + 30) {
         setVisibleCount(prev => Math.min(prev + 15, filteredHistory.length));
       }
     };
@@ -118,7 +118,7 @@ export function PopupPage() {
     const mainEl = document.querySelector('.app-main');
     const handleMainScroll = (e: Event) => {
       const target = e.target as HTMLElement;
-      if (target.scrollHeight - target.scrollTop <= target.clientHeight + 100) {
+      if (target.scrollHeight - target.scrollTop <= target.clientHeight + 30) {
         setVisibleCount(prev => Math.min(prev + 15, filteredHistory.length));
       }
     };
@@ -133,33 +133,6 @@ export function PopupPage() {
       }
     };
   }, [filteredHistory.length]);
-
-  // Load more images automatically if there is no scrollbar but more items are available
-  useEffect(() => {
-    if (visibleCount >= filteredHistory.length) return;
-
-    const checkAndLoadMore = () => {
-      const docHeight = document.documentElement.scrollHeight;
-      const winHeight = window.innerHeight;
-      let hasNoScroll = docHeight <= winHeight + 50;
-
-      const mainEl = document.querySelector('.app-main');
-      if (mainEl) {
-        const mainHeight = mainEl.scrollHeight;
-        const mainClientHeight = mainEl.clientHeight;
-        if (mainClientHeight > 0 && mainHeight <= mainClientHeight + 50) {
-          hasNoScroll = true;
-        }
-      }
-
-      if (hasNoScroll) {
-        setVisibleCount(prev => Math.min(prev + 15, filteredHistory.length));
-      }
-    };
-
-    const timer = setTimeout(checkAndLoadMore, 200);
-    return () => clearTimeout(timer);
-  }, [visibleCount, filteredHistory.length]);
 
   const updateStatus = (text: string, type: 'success' | 'error' | 'info' | 'warning' | null = 'info') => {
     setStatus({ text, type });
@@ -379,6 +352,19 @@ export function PopupPage() {
               </div>
             ))}
           </div>
+          {filteredHistory.length > visibleCount && (
+            <div style={{ 
+              height: '40px', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              color: 'var(--text-muted)', 
+              fontSize: '0.7rem',
+              marginTop: '8px'
+            }}>
+              ↓ スクロールしてさらに読み込み
+            </div>
+          )}
         </section>
       </main>
 

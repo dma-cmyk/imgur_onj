@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useChromeStorage } from '../hooks/useChromeStorage';
 import { deleteFromImgur } from '../lib/imgur';
 import { pasteToOpen2ch } from '../lib/onj';
@@ -43,20 +43,7 @@ export function HistoryPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
-
-  const [confirmState, setConfirmState] = useState<{
-    isOpen: boolean;
-    title: string;
-    message: string;
-    onConfirm: () => void;
-    variant: 'danger' | 'primary';
-  }>({
-    isOpen: false,
-    title: '',
-    message: '',
-    onConfirm: () => {},
-    variant: 'primary'
-  });
+  const [visibleCount, setVisibleCount] = useState(15);
 
   const filteredHistory = useMemo(() => {
     return history.filter(item => {
@@ -71,6 +58,41 @@ export function HistoryPage() {
       return matchesTag && matchesSearch;
     });
   }, [history, filterTag, searchQuery]);
+
+  // Reset visible count when filter or search changes
+  useEffect(() => {
+    setVisibleCount(15);
+  }, [filterTag, searchQuery]);
+
+  // Infinite scroll handler
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollHeight = document.documentElement.scrollHeight;
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      const clientHeight = window.innerHeight;
+      
+      if (scrollHeight - scrollTop <= clientHeight + 30) {
+        setVisibleCount(prev => Math.min(prev + 15, filteredHistory.length));
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [filteredHistory.length]);
+
+  const [confirmState, setConfirmState] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    variant: 'danger' | 'primary';
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+    variant: 'primary'
+  });
 
   const toggleSelect = (link: string) => {
     const newSelected = new Set(selectedLinks);
@@ -199,7 +221,7 @@ export function HistoryPage() {
       </div>
 
       <div className="history-grid" style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${thumbnailSize}px, 1fr))` }}>
-        {filteredHistory.map((item) => (
+        {filteredHistory.slice(0, visibleCount).map((item) => (
           <div key={item.link} className={`img-card ${selectedLinks.has(item.link) ? 'selected' : ''}`} onClick={() => openModal(item)} style={{ cursor: 'zoom-in', outline: selectedLinks.has(item.link) ? '4px solid var(--primary)' : 'none' }}>
             <img src={item.link.replace('.mp4', '.png').replace('.gifv', '.png')} alt={item.title} loading="lazy" />
             {isVideo(item.link) && <div style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.6)', borderRadius: 4, padding: 4, zIndex: 5 }}><Play size={14} color="white" fill="white" /></div>}
@@ -212,6 +234,19 @@ export function HistoryPage() {
           </div>
         ))}
       </div>
+      {filteredHistory.length > visibleCount && (
+        <div style={{ 
+          height: '40px', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          color: 'var(--text-muted)', 
+          fontSize: '0.75rem',
+          marginTop: '16px'
+        }}>
+          ↓ スクロールしてさらに読み込み
+        </div>
+      )}
 
       {modalItem && (
         <div className="custom-modal-overlay" onClick={() => setModalItem(null)}>

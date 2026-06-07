@@ -134,6 +134,33 @@ export function PopupPage() {
     };
   }, [filteredHistory.length]);
 
+  // Load more images automatically if there is no scrollbar but more items are available
+  useEffect(() => {
+    if (visibleCount >= filteredHistory.length) return;
+
+    const checkAndLoadMore = () => {
+      const docHeight = document.documentElement.scrollHeight;
+      const winHeight = window.innerHeight;
+      let hasNoScroll = docHeight <= winHeight + 50;
+
+      const mainEl = document.querySelector('.app-main');
+      if (mainEl) {
+        const mainHeight = mainEl.scrollHeight;
+        const mainClientHeight = mainEl.clientHeight;
+        if (mainClientHeight > 0 && mainHeight <= mainClientHeight + 50) {
+          hasNoScroll = true;
+        }
+      }
+
+      if (hasNoScroll) {
+        setVisibleCount(prev => Math.min(prev + 15, filteredHistory.length));
+      }
+    };
+
+    const timer = setTimeout(checkAndLoadMore, 200);
+    return () => clearTimeout(timer);
+  }, [visibleCount, filteredHistory.length]);
+
   const updateStatus = (text: string, type: 'success' | 'error' | 'info' | 'warning' | null = 'info') => {
     setStatus({ text, type });
     if (type === 'success' || type === 'error' || type === 'warning') {

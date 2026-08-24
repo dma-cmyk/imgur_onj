@@ -30,6 +30,7 @@ export function HistoryPage() {
     clientId, 
     loading,
     saveHistory,
+    deleteItems,
     updateItem,
     removeTagFromItem
   } = useChromeStorage();
@@ -140,11 +141,8 @@ export function HistoryPage() {
           return Promise.resolve();
         }));
 
-        // Persist the deletion as one update. Calling deleteItem repeatedly here
-        // made every call filter the same render-time history, so the last write
-        // restored all but one of the selected items.
         const linksToDelete = new Set(items.map(item => item.link));
-        saveHistory(history.filter(item => !linksToDelete.has(item.link)));
+        await deleteItems(linksToDelete);
         setSelectedLinks(new Set());
         setModalItem(null);
         setConfirmState(prev => ({ ...prev, isOpen: false }));

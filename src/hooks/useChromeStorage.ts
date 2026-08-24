@@ -53,7 +53,7 @@ export function useChromeStorage() {
     };
   }, [loadData]);
 
-  const saveHistory = (newHistory: UploadItem[]) => {
+  const saveHistory = (newHistory: UploadItem[], onSaved?: () => void) => {
     // Collect all unique tags from history to update global tag list
     const tagsInHistory = new Set<string>();
     newHistory.forEach(item => item.tags.forEach(t => tagsInHistory.add(t)));
@@ -66,11 +66,24 @@ export function useChromeStorage() {
       setHistory(newHistory);
       setAllTags(updatedGlobalTags);
       chrome.runtime.sendMessage({ action: 'historyUpdated' });
+      onSaved?.();
     });
   };
 
   const deleteItem = (link: string) => {
     saveHistory(history.filter(item => item.link !== link));
+  };
+
+  const deleteItems = (linksToDelete: Set<string>) => {
+    return new Promise<void>((resolve) => {
+      chrome.storage.local.get({ uploadHistory: [] }, (localData) => {
+        const latestHistory = ((localData.uploadHistory || []) as Array<UploadItem & { folder?: string }>).map(item => {
+          if (Array.isArray(item.tags)) return item;
+          return { ...item, tags: [item.folder || '未分類'] };
+        });
+        saveHistory(latestHistory.filter(item => !linksToDelete.has(item.link)), resolve);
+      });
+    });
   };
 
   const removeTagFromItem = (link: string, tagToRemove: string) => {
@@ -124,6 +137,7 @@ export function useChromeStorage() {
     loading,
     saveHistory,
     deleteItem,
+    deleteItems,
     updateItem,
     removeTagFromItem,
     saveAllTags,

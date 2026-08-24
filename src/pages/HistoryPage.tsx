@@ -30,7 +30,7 @@ export function HistoryPage() {
     clientId, 
     loading,
     saveHistory,
-    deleteItem,
+    deleteItems,
     updateItem,
     removeTagFromItem
   } = useChromeStorage();
@@ -134,16 +134,17 @@ export function HistoryPage() {
       message: `${items.length} 件の画像を削除しますか？\n(Imgurサーバーからも削除を試みます)`,
       variant: 'danger',
       onConfirm: async () => {
-        try {
-          for (const item of items) {
-            if (item.deletehash && clientId) await deleteFromImgur(item.deletehash, clientId).catch(() => {});
-            deleteItem(item.link);
+        await Promise.all(items.map(item => {
+          if (item.deletehash && clientId) {
+            return deleteFromImgur(item.deletehash, clientId).catch(() => {});
           }
-          setSelectedLinks(new Set());
-          setModalItem(null);
-        } catch (err) {
-          alert('削除中にエラーが発生しました。');
-        }
+          return Promise.resolve();
+        }));
+
+        const linksToDelete = new Set(items.map(item => item.link));
+        await deleteItems(linksToDelete);
+        setSelectedLinks(new Set());
+        setModalItem(null);
         setConfirmState(prev => ({ ...prev, isOpen: false }));
       }
     });
